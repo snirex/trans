@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>בחירת אתרים מהירה</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #fafafa;
+            --card-bg: #ffffff;
+            --text-main: #111111;
+            --text-secondary: #666666;
+            --accent: #1a1a1a;
+            --accent-hover: #333333;
+            --border-color: #eaeaea;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 24px 16px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        header {
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 6px;
+        }
+
+        p.subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* טיימר וויזואלי */
+        .timer-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        }
+
+        .timer-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .timer-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .timer-countdown {
+            font-size: 1.25rem;
+            font-weight: 750;
+            color: var(--text-main);
+        }
+
+        .btn-pause {
+            background: #f1f1f1;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-pause:hover {
+            background: #e2e2e2;
+        }
+
+        /* רשימת האתרים */
+        .sites-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .site-card {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius);
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .site-card:hover {
+            border-color: var(--accent);
+        }
+
+        .site-card.active {
+            border-color: var(--accent);
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .site-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .site-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .site-url {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .site-action-icon {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: transform 0.2s;
+        }
+
+        .site-card:hover .site-action-icon {
+            transform: translateX(-3px);
+            color: var(--accent);
+        }
+
+        /* כפתור מעבר מיידי */
+        .btn-go {
+            width: 100%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .btn-go:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-go:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>בחר יעד</h1>
+            <p class="subtitle">המערכת תעביר אותך אוטומטית ליעדך</p>
+        </header>
+
+        <!-- קוביית טיימר -->
+        <div class="timer-card">
+            <div class="timer-info">
+                <span class="timer-title" id="timerStatusText">מעבר אוטומטי בעוד</span>
+                <span class="timer-countdown"><span id="countdownNumber">3</span> שניות</span>
+            </div>
+            <button class="btn-pause" id="pauseBtn" onclick="togglePause()">השהה</button>
+        </div>
+
+        <!-- רשימת האתרים לבחירה (ניתן להוסיף או לשנות לפי הצורך) -->
+        <div class="sites-list" id="sitesContainer">
+            <!-- אתר 1 (ברירת מחדל) -->
+            <div class="site-card" data-url="https://www.google.com" onclick="selectSite(0)">
+                <div class="site-details">
+                    <span class="site-name">גוגל (ברירת מחדל)</span>
+                    <span class="site-url">google.com</span>
+                </div>
+                <div class="site-action-icon">←</div>
+            </div>
+
+            <!-- אתר 2 -->
+            <div class="site-card" data-url="https://www.github.com" onclick="selectSite(1)">
+                <div class="site-details">
+                    <span class="site-name">גיטהאב</span>
+                    <span class="site-url">github.com</span>
+                </div>
+                <div class="site-action-icon">←</div>
+            </div>
+
+            <!-- אתר 3 -->
+            <div class="site-card" data-url="https://www.wikipedia.org" onclick="selectSite(2)">
+                <div class="site-details">
+                    <span class="site-name">ויקיפדיה</span>
+                    <span class="site-url">wikipedia.org</span>
+                </div>
+                <div class="site-action-icon">←</div>
+            </div>
+        </div>
+
+        <!-- כפתור כניסה ידנית מיידית -->
+        <button class="btn-go" onclick="navigateToSelected()">הכנס עכשיו</button>
+    </div>
+
+    <script>
+        const sites = [
+            { name: "גוגל", url: "https://www.google.com" },
+            { name: "גיטהאב", url: "https://www.github.com" },
+            { name: "ויקיפדיה", url: "https://www.wikipedia.org" }
+        ];
+
+        let selectedIndex = 0;
+        let timeLeft = 3;
+        let timerInterval = null;
+        let isPaused = false;
+
+        const countdownEl = document.getElementById("countdownNumber");
+        const statusTextEl = document.getElementById("timerStatusText");
+        const pauseBtnEl = document.getElementById("pauseBtn");
+        const siteCards = document.querySelectorAll(".site-card");
+
+        // אתחול בעת טעינת העמוד
+        function init() {
+            // בדיקה אם יש אתר אחרון שנשמר בזיכרון, אם לא - ברירת מחדל היא 0 (הראשון)
+            const lastSelected = localStorage.getItem("lastSelectedSiteIndex");
+            if (lastSelected !== null && lastSelected >= 0 && lastSelected < sites.length) {
+                selectedIndex = parseInt(lastSelected);
+            } else {
+                selectedIndex = 0; // ברירת מחדל אתר ראשון
+            }
+
+            updateUI();
+            startTimer();
+        }
+
+        // עדכון עיצוב הכרטיסיות הפעילות
+        function updateUI() {
+            siteCards.forEach((card, index) => {
+                if (index === selectedIndex) {
+                    card.classList.add("active");
+                } else {
+                    card.classList.remove("active");
+                }
+            });
+        }
+
+        // בחירת אתר בלחיצת משתמש
+        function selectSite(index) {
+            selectedIndex = index;
+            // שמירה בזיכרון המקומי כאתר האחרון שנבחר
+            localStorage.setItem("lastSelectedSiteIndex", selectedIndex);
+            
+            // עצירת הטיימר ברגע שהמשתמש בחר ידנית
+            pauseTimer();
+            statusTextEl.innerText = "הבחירה עודכנה";
+            updateUI();
+        }
+
+        // הפעלת הטיימר לאחור
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    countdownEl.innerText = timeLeft;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        navigateToSelected();
+                    }
+                }
+            }, 1000);
+        }
+
+        // השהייה / הפעלה מחדש של הטיימר
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseBtnEl.innerText = "המשך";
+                statusTextEl.innerText = "הספירה מושהית";
+            } else {
+                pauseBtnEl.innerText = "השהה";
+                statusTextEl.innerText = "מעבר אוטומטי בעוד";
+            }
+        }
+
+        function pauseTimer() {
+            isPaused = true;
+            pauseBtnEl.innerText = "המשך";
+            if (timerInterval) clearInterval(timerInterval);
+        }
+
+        // מעבר בפועל לכתובת הנבחרת
+        function navigateToSelected() {
+            const targetUrl = sites[selectedIndex].url;
+            // שמירה סופית של הבחירה
+            localStorage.setItem("lastSelectedSiteIndex", selectedIndex);
+            window.location.href = targetUrl;
+        }
+
+        // הרצת האתחול
+        window.onload = init;
+    </script>
+</body>
+</html>
