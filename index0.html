@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מתרגם שיחות חי</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        select {
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: #fff;
+            font-size: 0.85rem;
+            color: var(--text-main);
+            outline: none;
+            cursor: pointer;
+        }
+
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        .text-box {
+            flex: 1;
+            min-height: 120px;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 12px;
+            background-color: #f8fafc;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #startBtn {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #startBtn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        #startBtn.recording {
+            background-color: var(--danger);
+        }
+
+        #startBtn.recording:hover {
+            background-color: var(--danger-hover);
+        }
+
+        #clearBtn {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            flex: 0.4;
+        }
+
+        #clearBtn:hover {
+            background-color: #cbd5e1;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>מתרגם שיחות בזמן אמת</h1>
+    </header>
+
+    <div class="container">
+        <!-- תיבה עליונה: תמלל מקור -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">תמלל מקור (שמע)</span>
+                <select id="sourceLang">
+                    <option value="he-IL">עברית</option>
+                    <option value="en-US" selected>אנגלית (US)</option>
+                    <option value="es-ES">ספרדית</option>
+                    <option value="fr-FR">צרפתית</option>
+                    <option value="de-DE">גרמנית</option>
+                    <option value="ar-SA">ערבית</option>
+                    <option value="ru-RU">רוסית</option>
+                </select>
+            </div>
+            <div id="sourceText" class="text-box">המתן להאזנה...</div>
+        </div>
+
+        <!-- תיבה תחתונה: תרגום -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">תרגום</span>
+                <select id="targetLang">
+                    <option value="he" selected>עברית</option>
+                    <option value="en">אנגלית</option>
+                    <option value="es">ספרדית</option>
+                    <option value="fr">צרפתית</option>
+                    <option value="de">גרמנית</option>
+                    <option value="ar">ערבית</option>
+                    <option value="ru">רוסית</option>
+                </select>
+            </div>
+            <div id="targetText" class="text-box">התרגום יופיע כאן...</div>
+        </div>
+
+        <!-- כפתורי שליטה -->
+        <div class="controls">
+            <button id="startBtn">התחל האזנה</button>
+            <button id="clearBtn">נקה</button>
+        </div>
+
+        <div id="status" class="status">המערכת מוכנה</div>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const sourceTextEl = document.getElementById('sourceText');
+        const targetTextEl = document.getElementById('targetText');
+        const sourceLangSelect = document.getElementById('sourceLang');
+        const targetLangSelect = document.getElementById('targetLang');
+        const statusEl = document.getElementById('status');
+
+        let recognition = null;
+        let isRecording = false;
+
+        // בדיקת תמיכה בדפדפן עבור Web Speech API
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert('הדפדפן שלך אינו תומך בזיהוי קול. מומלץ להשתמש ב-Google Chrome בנייד.');
+            statusEl.textContent = 'הדפדפן אינו נתמך';
+            startBtn.disabled = true;
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                startBtn.textContent = 'עצור האזנה';
+                startBtn.classList.add('recording');
+                statusEl.textContent = 'מאזין למיקרופון...';
+            };
+
+            recognition.onerror = (event) => {
+                console.error('שגיאת זיהוי קול:', event.error);
+                statusEl.textContent = `שגיאה: ${event.error}`;
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    // אם נעצר בטעות (למשל שקט ממושך), ננסה להפעיל מחדש רציף
+                    try {
+                        recognition.start();
+                    } catch (e) {
+                        stopRecording();
+                    }
+                } else {
+                    stopRecording();
+                }
+            };
+
+            recognition.onresult = async (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+
+                const currentText = finalTranscript || interimTranscript;
+                if (currentText) {
+                    sourceTextEl.textContent = currentText;
+                    // שליחה לתרגום
+                    await translateText(currentText, sourceLangSelect.value.split('-')[0], targetLangSelect.value);
+                }
+            };
+        }
+
+        function startRecording() {
+            recognition.lang = sourceLangSelect.value;
+            try {
+                sourceTextEl.textContent = '';
+                targetTextEl.textContent = '';
+                recognition.start();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            startBtn.textContent = 'התחל האזנה';
+            startBtn.classList.remove('recording');
+            statusEl.textContent = 'ההאזנה הופסקה';
+            try {
+                recognition.stop();
+            } catch (e) {}
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (!isRecording) {
+                startRecording();
+            } else {
+                stopRecording();
+            }
+        });
+
+        clearBtn.addEventListener('click', () => {
+            sourceTextEl.textContent = 'המתן להאזנה...';
+            targetTextEl.textContent = 'התרגום יופיע כאן...';
+        });
+
+        // פונקציית תרגום באמצעות API ציבורי חינמי (MyMemory)
+        async function translateText(text, sourceLang, targetLang) {
+            if (!text.trim()) return;
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data && data.responseData && data.responseData.translatedText) {
+                    targetTextEl.textContent = data.responseData.translatedText;
+                }
+            } catch (error) {
+                console.error('שגיאת תרגום:', error);
+                targetTextEl.textContent = 'שגיאה בתרגום הטקסט...';
+            }
+        }
+    </script>
+</body>
+</html>
