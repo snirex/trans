@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מתרגם שיחות אוטומטי</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --border: #e2e8f0;
+            --bubble-1: #eff6ff;
+            --bubble-2: #f0fdf4;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        /* פס הגדרות שפה */
+        .settings-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .setting-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        select {
+            padding: 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background-color: #fff;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            outline: none;
+        }
+
+        /* אינדיקטור לזיהוי דובר אוטומטי */
+        .auto-speaker-indicator {
+            background-color: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .current-active-speaker {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* אזור השיחה המתגלגל */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .message-bubble {
+            padding: 10px 12px;
+            border-radius: 12px;
+            max-width: 85%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .message-bubble.speaker-1 {
+            background-color: var(--bubble-1);
+            align-self: flex-start;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message-bubble.speaker-2 {
+            background-color: var(--bubble-2);
+            align-self: flex-end;
+            border-bottom-left-radius: 2px;
+        }
+
+        .msg-header {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .msg-original {
+            font-weight: 600;
+        }
+
+        .msg-translated {
+            color: #0f766e;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 4px;
+        }
+
+        /* כפתורי שליטה בתחתית */
+        .controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        button.action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #startBtn {
+            flex: 1;
+            background-color: var(--primary);
+            color: white;
+        }
+
+        #startBtn.recording {
+            background-color: var(--danger);
+        }
+
+        #clearBtn {
+            background-color: #e2e8f0;
+            color: var(--text-main);
+            width: 100px;
+        }
+
+        .status {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>מתרגם שיחות אוטומטי</h1>
+    </header>
+
+    <!-- הגדרות שפה -->
+    <div class="settings-bar">
+        <div class="setting-group">
+            <label>שפת שמע (מקור)</label>
+            <select id="sourceLang">
+                <option value="he-IL">עברית</option>
+                <option value="en-US" selected>אנגלית</option>
+                <option value="es-ES">ספרדית</option>
+                <option value="fr-FR">צרפתית</option>
+                <option value="ar-SA">ערבית</option>
+                <option value="ru-RU">רוסית</option>
+            </select>
+        </div>
+        <div class="setting-group">
+            <label>שפת תרגום</label>
+            <select id="targetLang">
+                <option value="he" selected>עברית</option>
+                <option value="en">אנגלית</option>
+                <option value="es">ספרדית</option>
+                <option value="fr">צרפתית</option>
+                <option value="ar">ערבית</option>
+                <option value="ru">רוסית</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- אינדיקטור דובר נוכחי -->
+    <div class="auto-speaker-indicator">
+        <span>זיהוי דוברים אוטומטי (מבוסס הפסקות דיבור)</span>
+        <span id="activeSpeakerLabel" class="current-active-speaker">דובר 1</span>
+    </div>
+
+    <!-- אזור הצגת השיחה -->
+    <div id="chatContainer" class="chat-container">
+        <div style="text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.85rem;">
+            לחץ על "התחל האזנה" והתחל לנהל שיחה...
+        </div>
+    </div>
+
+    <!-- כפתורי שליטה -->
+    <div class="controls">
+        <button id="startBtn" class="action-btn">התחל האזנה</button>
+        <button id="clearBtn" class="action-btn">רוקן תיבה</button>
+    </div>
+
+    <div id="status" class="status">מוכן</div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const chatContainer = document.getElementById('chatContainer');
+        const sourceLangSelect = document.getElementById('sourceLang');
+        const targetLangSelect = document.getElementById('targetLang');
+        const statusEl = document.getElementById('status');
+        const activeSpeakerLabel = document.getElementById('activeSpeakerLabel');
+        
+        let currentSpeaker = 1;
+        let recognition = null;
+        let isRecording = false;
+        let lastSpeechTime = Date.now();
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+            alert('הדפדפן שלך אינו תומך בזיהוי קול. השתמש ב-Chrome בנייד.');
+            startBtn.disabled = true;
+        } else {
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                startBtn.textContent = 'עצור האזנה';
+                startBtn.classList.add('recording');
+                statusEl.textContent = 'מאזין לשיחה...';
+                lastSpeechTime = Date.now();
+            };
+
+            recognition.onerror = (event) => {
+                statusEl.textContent = `שגיאה: ${event.error}`;
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    try { recognition.start(); } catch (e) { stopRecording(); }
+                } else {
+                    stopRecording();
+                }
+            };
+
+            recognition.onresult = async (event) => {
+                const transcript = event.results[event.results.length - 1][0].transcript.trim();
+                if (transcript) {
+                    const now = Date.now();
+                    
+                    // מנגנון זיהוי דובר אוטומטי:
+                    // אם עברו מעל 2.5 שניות של שקט מאז המשפט האחרון, אנחנו מניחים שדובר אחר החל לדבר
+                    if (now - lastSpeechTime > 2500) {
+                        currentSpeaker = currentSpeaker === 1 ? 2 : 1;
+                        activeSpeakerLabel.textContent = `דובר ${currentSpeaker}`;
+                    }
+                    lastSpeechTime = now;
+
+                    // הסרת הודעת הפתיחה הריקה אם קיימת
+                    if (chatContainer.querySelector('div[style*="margin-top"]')) {
+                        chatContainer.innerHTML = '';
+                    }
+
+                    // תרגום הטקסט
+                    const translatedText = await translateText(transcript, sourceLangSelect.value.split('-')[0], targetLangSelect.value);
+                    
+                    // הוספה להיסטוריה
+                    appendMessage(currentSpeaker, transcript, translatedText);
+                }
+            };
+        }
+
+        function appendMessage(speaker, original, translated) {
+            const bubble = document.createElement('div');
+            bubble.className = `message-bubble speaker-${speaker}`;
+            
+            bubble.innerHTML = `
+                <div class="msg-header">
+                    <span>דובר ${speaker}</span>
+                    <span>${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                </div>
+                <div class="msg-original">${original}</div>
+                <div class="msg-translated">${translated}</div>
+            `;
+            
+            chatContainer.appendChild(bubble);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function translateText(text, sourceLang, targetLang) {
+            try {
+                const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                return (data && data.responseData && data.responseData.translatedText) ? data.responseData.translatedText : 'שגיאה בתרגום';
+            } catch (error) {
+                return 'שגיאה בתרגום';
+            }
+        }
+
+        function startRecording() {
+            recognition.lang = sourceLangSelect.value;
+            try {
+                recognition.start();
+            } catch (e) { console.error(e); }
+        }
+
+        function stopRecording() {
+            isRecording = false;
+            startBtn.textContent = 'התחל האזנה';
+            startBtn.classList.remove('recording');
+            statusEl.textContent = 'ההאזנה הופסקה';
+            try { recognition.stop(); } catch (e) {}
+        }
+
+        startBtn.addEventListener('click', () => {
+            if (!isRecording) startRecording();
+            else stopRecording();
+        });
+
+        // כפתור ריקון תיבת שיחה
+        clearBtn.addEventListener('click', () => {
+            chatContainer.innerHTML = '<div style="text-align: center; color: var(--text-muted); margin-top: 40px; font-size: 0.85rem;">תיבת השיחה רוקנה</div>';
+            currentSpeaker = 1;
+            activeSpeakerLabel.textContent = `דובר 1`;
+        });
+    </script>
+</body>
+</html>
